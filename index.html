@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #enter-btn:hover {
+            background-color: #57e843;
+        }
+
+        #exit-btn:hover {
+            background-color: #f5385b;
+        }
+
+        #show-slot-size:hover{
+            background-color: #deeb52;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .controls div {
+            flex: 1;
+            margin: 0 10px;
+        }
+
+        select, button, input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .parking-lot {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .spot {
+            background-color: #B6E3A1;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .spot.occupied {
+            background-color: #F5B7B1;
+        }
+
+        .info {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .info p {
+            font-size: 18px;
+            color: #555;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-buttons button {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Smart Parking System</h1>
+        <br>
+        <br>
+        <br>
+        <br>
+        
+
+        <div class="controls">
+            <!-- Vehicle Type Selection -->
+            <div>
+                <label for="vehicle-type">Select Vehicle Type:</label>
+                <select id="vehicle-type">
+                    <option value="Bike">Bike</option>
+                    <option value="Semi-Sedan">Semi-Sedan</option>
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                </select>
+            </div>
+
+            <!-- Show Slot Size -->
+            <div>
+                <button id="show-slot-size">Show Parking Slot Size</button>
+            </div>
+
+            <!-- Vehicle Spot Entry -->
+            <div>
+                <label for="spot-entry">Enter Vehicle Spot ID (Exit):</label>
+                <input type="number" id="spot-entry" placeholder="Spot ID (1-5)">
+            </div>
+        </div>
+
+        <!-- Control Buttons (Enter / Exit) -->
+        <div class="control-buttons">
+            <button id="enter-btn">Enter</button>
+            <button id="exit-btn">Exit</button>
+        </div>
+
+        <!-- Parking Spot Grid -->
+        <div class="parking-lot" id="parking-lot">
+            <!-- Dynamic parking spots will be generated here -->
+        </div>
+
+        <!-- Info Section -->
+        <div class="info">
+            <p id="slot-size">Please select a vehicle type to see the slot size.</p>
+            <p class="error" id="error-message"></p>
+        </div>
+    </div>
+
+    <script>
+        // Parking spots for each vehicle type
+        const parkingSpots = {
+            "Bike": [0, 0, 0, 0, 0],
+            "Semi-Sedan": [0, 0, 0, 0, 0],
+            "Sedan": [0, 0, 0, 0, 0],
+            "SUV": [0, 0, 0, 0, 0]
+        };
+
+        const vehicleTypeSelect = document.getElementById('vehicle-type');
+        const showSlotSizeBtn = document.getElementById('show-slot-size');
+        const parkingLot = document.getElementById('parking-lot');
+        const spotEntry = document.getElementById('spot-entry');
+        const slotSizeText = document.getElementById('slot-size');
+        const errorMessage = document.getElementById('error-message');
+        const enterBtn = document.getElementById('enter-btn');
+        const exitBtn = document.getElementById('exit-btn');
+
+        // Update the parking lot display based on the selected vehicle type
+        function updateParkingLot() {
+            const vehicleType = vehicleTypeSelect.value;
+            parkingLot.innerHTML = '';
+
+            // Show parking spots for the selected vehicle type
+            parkingSpots[vehicleType].forEach((spot, index) => {
+                const spotDiv = document.createElement('div');
+                spotDiv.classList.add('spot');
+                spotDiv.classList.toggle('occupied', spot === 1);
+                spotDiv.innerText = `Spot ${index + 1}`;
+
+                parkingLot.appendChild(spotDiv);
+            });
+        }
+
+        // Park a vehicle in the selected spot
+        function parkVehicle(vehicleType, spotIndex) {
+            if (parkingSpots[vehicleType][spotIndex] === 0) {
+                parkingSpots[vehicleType][spotIndex] = 1;
+                updateParkingLot();
+                errorMessage.textContent = '';
+            } else {
+                errorMessage.textContent = 'This spot is already occupied.';
+            }
+        }
+
+        // Remove a vehicle from the selected spot
+        function removeVehicle(vehicleType, spotIndex) {
+            if (parkingSpots[vehicleType][spotIndex] === 1) {
+                parkingSpots[vehicleType][spotIndex] = 0;
+                updateParkingLot();
+                errorMessage.textContent = '';
+            } else {
+                errorMessage.textContent = 'This spot is already empty.';
+            }
+        }
+
+        // Show parking slot size based on vehicle type
+        showSlotSizeBtn.addEventListener('click', () => {
+            const vehicleType = vehicleTypeSelect.value;
+            if (vehicleType === "Bike") {
+                slotSizeText.textContent = "Standard Bike Parking Slot: 1.5m x 2.5m";
+            } else if (vehicleType === "Semi-Sedan") {
+                slotSizeText.textContent = "Standard Semi-Sedan Parking Slot: 2.4m x 5m";
+            } else if (vehicleType === "Sedan") {
+                slotSizeText.textContent = "Standard Sedan Parking Slot: 2.5m x 5m";
+            } else if (vehicleType === "SUV") {
+                slotSizeText.textContent = "Standard SUV Parking Slot: 2.7m x 5.5m";
+            }
+
+            updateParkingLot();
+        });
+
+        // Function to handle "Enter" button logic
+        enterBtn.addEventListener('click', () => {
+            const vehicleType = vehicleTypeSelect.value;
+            const spotId = parseInt(spotEntry.value) - 1; // Convert to 0-based index
+            if (spotId >= 0 && spotId < 5) {
+                parkVehicle(vehicleType, spotId);
+                errorMessage.textContent = '';
+            } else {
+                errorMessage.textContent = 'Please enter a valid spot ID (1-5).';
+            }
+        });
+
+        // Function to handle "Exit" button logic
+        exitBtn.addEventListener('click', () => {
+            const vehicleType = vehicleTypeSelect.value;
+            const spotId = parseInt(spotEntry.value) - 1; // Convert to 0-based index
+            if (spotId >= 0 && spotId < 5) {
+                removeVehicle(vehicleType, spotId);
+                errorMessage.textContent = '';
+            } else {
+                errorMessage.textContent = 'Please enter a valid spot ID (1-5).';
+            }
+        });
+
+        // Initial load of parking lot with bike selected
+        updateParkingLot();
+
+        // Change parking lot display based on vehicle type change
+        vehicleTypeSelect.addEventListener('change', updateParkingLot);
+    </script>
+</body>
+</html>
